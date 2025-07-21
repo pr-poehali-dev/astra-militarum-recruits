@@ -1,12 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Icon from "@/components/ui/icon";
 import { useState, useEffect } from "react";
 
 const Index = () => {
   const [isCorrupted, setIsCorrupted] = useState(false);
   const [chaosMessages, setChaosMessages] = useState<string[]>([]);
+  const [isPurifying, setIsPurifying] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    segment: '',
+    worldNumber: '',
+    planet: '',
+    hiveCity: '',
+    race: '',
+    serialNumber: ''
+  });
   
   const chaosTexts = [
     "КРОВЬ ДЛЯ БОГА КРОВИ!",
@@ -31,6 +45,28 @@ const Index = () => {
     
     return () => clearTimeout(corruptionTimer);
   }, []);
+
+  const purifyFromChaos = () => {
+    setIsPurifying(true);
+    setChaosMessages(["ОЧИЩЕНИЕ НАЧАЛОСЬ...", "ИМПЕРАТОР ЗАЩИЩАЕТ!", "ХАОС ОТСТУПАЕТ!"]);
+    
+    setTimeout(() => {
+      setIsCorrupted(false);
+      setChaosMessages([]);
+      setIsPurifying(false);
+    }, 3000);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Заявка подана:', formData);
+    setIsDialogOpen(false);
+    setChaosMessages(["НОВОБРАНЕЦ ЗАРЕГИСТРИРОВАН", "ОЖИДАЙТЕ ИНСТРУКЦИЙ"]);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const regiments = [
     {
@@ -95,15 +131,47 @@ const Index = () => {
   ];
 
   const arsenal = isCorrupted ? [
-    { name: "Варп-болтер", type: "Демоническое оружие" },
-    { name: "Броня Хаоса", type: "Живая защита" },
-    { name: "Клинок перемен", type: "Мутирующее оружие" },
-    { name: "Гранаты варпа", type: "Реальность-бомбы" }
+    { 
+      name: "Варп-болтер", 
+      type: "Демоническое оружие",
+      description: "Стреляет энергией варпа, искажающей реальность. Каждый выстрел может мутировать цель или открыть портал в Имматериум."
+    },
+    { 
+      name: "Броня Хаоса", 
+      type: "Живая защита",
+      description: "Демоническая броня, сплавленная с плотью носителя. Самостоятельно залечивает раны и шепчет запретные знания."
+    },
+    { 
+      name: "Клинок перемен", 
+      type: "Мутирующее оружие",
+      description: "Постоянно изменяющийся клинок Тзинча. При каждом ударе принимает новую форму и наделяет врага случайными мутациями."
+    },
+    { 
+      name: "Гранаты варпа", 
+      type: "Реальность-бомбы",
+      description: "Взрывчатка, нарушающая законы физики. Взрыв может обратить время вспять, изменить гравитацию или призвать демонов."
+    }
   ] : [
-    { name: "Лазган M36", type: "Основное оружие" },
-    { name: "Карапасная броня", type: "Защита" },
-    { name: "Кинжал боевой", type: "Ближний бой" },
-    { name: "Фраг-гранаты", type: "Взрывчатка" }
+    { 
+      name: "Лазган M36", 
+      type: "Основное оружие",
+      description: "Стандартное лазерное оружие Имперской Гвардии. Надёжное, простое в обслуживании, эффективное против большинства целей."
+    },
+    { 
+      name: "Карапасная броня", 
+      type: "Защита",
+      description: "Лёгкая защитная броня из композитных материалов. Обеспечивает баланс между защитой и мобильностью на поле боя."
+    },
+    { 
+      name: "Кинжал боевой", 
+      type: "Ближний бой",
+      description: "Многофункциональный нож для ближнего боя и полевых работ. Острый моноклинок способен прорезать большинство материалов."
+    },
+    { 
+      name: "Фраг-гранаты", 
+      type: "Взрывчатка",
+      description: "Осколочные гранаты стандартного образца. Эффективны против пехоты противника и лёгкой техники в радиусе поражения."
+    }
   ];
 
   const worlds = isCorrupted ? [
@@ -121,16 +189,30 @@ const Index = () => {
   return (
     <div className={`min-h-screen ${isCorrupted ? 'bg-gradient-to-b from-chaos-purple via-chaos-corruption to-black' : 'bg-gradient-to-b from-imperial-dark via-gray-900 to-black'} text-imperial-white relative`}>
       {/* Chaos Corruption Overlay */}
-      {isCorrupted && (
+      {(isCorrupted || isPurifying) && (
         <>
-          <div className="fixed inset-0 bg-gradient-to-br from-chaos-pink/10 via-chaos-purple/5 to-chaos-blue/10 animate-corruption-spread pointer-events-none z-10" />
+          <div className={`fixed inset-0 ${isPurifying ? 'bg-gradient-to-br from-imperial-gold/20 via-imperial-red/10 to-imperial-gold/20' : 'bg-gradient-to-br from-chaos-pink/10 via-chaos-purple/5 to-chaos-blue/10'} ${isPurifying ? 'animate-fade-in' : 'animate-corruption-spread'} pointer-events-none z-10`} />
           <div className="fixed top-4 right-4 z-50 space-y-2">
             {chaosMessages.map((message, index) => (
-              <div key={index} className="bg-chaos-corruption/90 text-chaos-pink border border-chaos-pink p-2 rounded animate-chaos-flicker">
-                <p className="text-sm font-bold animate-glitch">{message}</p>
+              <div key={index} className={`${isPurifying ? 'bg-imperial-gold/90 text-imperial-dark border-imperial-red' : 'bg-chaos-corruption/90 text-chaos-pink border-chaos-pink'} border p-2 rounded ${isPurifying ? 'animate-fade-in' : 'animate-chaos-flicker'}`}>
+                <p className={`text-sm font-bold ${isPurifying ? '' : 'animate-glitch'}`}>{message}</p>
               </div>
             ))}
           </div>
+          
+          {/* Purification Button */}
+          {isCorrupted && !isPurifying && (
+            <div className="fixed bottom-4 left-4 z-50">
+              <Button 
+                onClick={purifyFromChaos}
+                className="bg-imperial-gold hover:bg-imperial-gold/80 text-imperial-dark border-2 border-imperial-red animate-pulse-glow"
+                size="lg"
+              >
+                <Icon name="Shield" className="mr-2" />
+                ВО СЛАВУ ИМПЕРАТОРА
+              </Button>
+            </div>
+          )}
         </>
       )}
 
@@ -186,10 +268,127 @@ const Index = () => {
             }
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className={`${isCorrupted ? 'bg-chaos-purple hover:bg-chaos-corruption border-chaos-pink animate-pulse-glow' : 'bg-imperial-red hover:bg-imperial-red/80 border-imperial-gold'} text-white border-2`}>
-              <Icon name={isCorrupted ? "Zap" : "Sword"} className="mr-2" />
-              {isCorrupted ? 'ПРИНЯТЬ ХАОС' : 'ЗАПИСАТЬСЯ В ГВАРДИЮ'}
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg" className={`${isCorrupted ? 'bg-chaos-purple hover:bg-chaos-corruption border-chaos-pink animate-pulse-glow' : 'bg-imperial-red hover:bg-imperial-red/80 border-imperial-gold'} text-white border-2`}>
+                  <Icon name={isCorrupted ? "Zap" : "Sword"} className="mr-2" />
+                  {isCorrupted ? 'ПРИНЯТЬ ХАОС' : 'ЗАПИСАТЬСЯ В ГВАРДИЮ'}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className={`${isCorrupted ? 'bg-chaos-corruption border-chaos-pink' : 'bg-imperial-dark border-imperial-gold'} text-white`}>
+                <DialogHeader>
+                  <DialogTitle className={isCorrupted ? 'text-chaos-pink' : 'text-imperial-gold'}>
+                    {isCorrupted ? 'КОНТРАКТ С ХАОСОМ' : 'ЗАЯВКА В ASTRA MILITARUM'}
+                  </DialogTitle>
+                  <DialogDescription className={isCorrupted ? 'text-chaos-blue' : 'text-gray-300'}>
+                    {isCorrupted ? 'Отдай свою душу служению Тёмным Богам' : 'Заполните данные для вступления в Имперскую Гвардию'}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className={isCorrupted ? 'text-chaos-green' : 'text-imperial-white'}>
+                        {isCorrupted ? 'Сектор Хаоса' : 'Сегмент'}
+                      </Label>
+                      <Select onValueChange={(value) => handleInputChange('segment', value)}>
+                        <SelectTrigger className={`${isCorrupted ? 'border-chaos-pink bg-chaos-corruption/50' : 'border-imperial-red bg-imperial-gray/50'}`}>
+                          <SelectValue placeholder={isCorrupted ? "Выберите демонмир" : "Выберите сегмент"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isCorrupted ? [
+                            <SelectItem key="eye" value="eye-terror">Око Ужаса</SelectItem>,
+                            <SelectItem key="maelstrom" value="maelstrom">Водоворот</SelectItem>,
+                            <SelectItem key="warp" value="warp-storm">Варп-Шторм</SelectItem>
+                          ] : [
+                            <SelectItem key="solar" value="segmentum-solar">Сегментум Солар</SelectItem>,
+                            <SelectItem key="obscurus" value="segmentum-obscurus">Сегментум Обскурус</SelectItem>,
+                            <SelectItem key="pacificus" value="segmentum-pacificus">Сегментум Пацификус</SelectItem>
+                          ]}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className={isCorrupted ? 'text-chaos-green' : 'text-imperial-white'}>
+                        {isCorrupted ? 'Номер Демонмира' : 'Номер Мира'}
+                      </Label>
+                      <Input 
+                        placeholder={isCorrupted ? "666.М41" : "001.М42"}
+                        value={formData.worldNumber}
+                        onChange={(e) => handleInputChange('worldNumber', e.target.value)}
+                        className={`${isCorrupted ? 'border-chaos-pink bg-chaos-corruption/50 text-chaos-blue' : 'border-imperial-red bg-imperial-gray/50 text-white'}`}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label className={isCorrupted ? 'text-chaos-green' : 'text-imperial-white'}>
+                      {isCorrupted ? 'Планета Коррупции' : 'Планета'}
+                    </Label>
+                    <Input 
+                      placeholder={isCorrupted ? "Мир Тысячи Мутаций" : "Кадия Прайм"}
+                      value={formData.planet}
+                      onChange={(e) => handleInputChange('planet', e.target.value)}
+                      className={`${isCorrupted ? 'border-chaos-pink bg-chaos-corruption/50 text-chaos-blue' : 'border-imperial-red bg-imperial-gray/50 text-white'}`}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className={isCorrupted ? 'text-chaos-green' : 'text-imperial-white'}>
+                      {isCorrupted ? 'Проклятый Улей' : 'Город-Улей'}
+                    </Label>
+                    <Input 
+                      placeholder={isCorrupted ? "Башня Тзинча" : "Верхний Улей Кастелан"}
+                      value={formData.hiveCity}
+                      onChange={(e) => handleInputChange('hiveCity', e.target.value)}
+                      className={`${isCorrupted ? 'border-chaos-pink bg-chaos-corruption/50 text-chaos-blue' : 'border-imperial-red bg-imperial-gray/50 text-white'}`}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className={isCorrupted ? 'text-chaos-green' : 'text-imperial-white'}>
+                        {isCorrupted ? 'Мутантская Раса' : 'Раса'}
+                      </Label>
+                      <Select onValueChange={(value) => handleInputChange('race', value)}>
+                        <SelectTrigger className={`${isCorrupted ? 'border-chaos-pink bg-chaos-corruption/50' : 'border-imperial-red bg-imperial-gray/50'}`}>
+                          <SelectValue placeholder={isCorrupted ? "Выберите мутацию" : "Выберите расу"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isCorrupted ? [
+                            <SelectItem key="mutant" value="chaos-mutant">Мутант Хаоса</SelectItem>,
+                            <SelectItem key="cultist" value="chaos-cultist">Культист</SelectItem>,
+                            <SelectItem key="spawn" value="chaos-spawn">Отродье Хаоса</SelectItem>
+                          ] : [
+                            <SelectItem key="human" value="human">Человек</SelectItem>,
+                            <SelectItem key="abhuman" value="abhuman">Абчеловек</SelectItem>,
+                            <SelectItem key="ogryn" value="ogryn">Огрин</SelectItem>
+                          ]}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className={isCorrupted ? 'text-chaos-green' : 'text-imperial-white'}>
+                        {isCorrupted ? 'Метка Проклятия' : 'Порядковый Номер'}
+                      </Label>
+                      <Input 
+                        placeholder={isCorrupted ? "ΧΑΟ∑-999" : "IG-123456"}
+                        value={formData.serialNumber}
+                        onChange={(e) => handleInputChange('serialNumber', e.target.value)}
+                        className={`${isCorrupted ? 'border-chaos-pink bg-chaos-corruption/50 text-chaos-blue' : 'border-imperial-red bg-imperial-gray/50 text-white'}`}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className={`w-full ${isCorrupted ? 'bg-chaos-purple hover:bg-chaos-corruption border-chaos-pink' : 'bg-imperial-red hover:bg-imperial-red/80 border-imperial-gold'} text-white border-2`}
+                  >
+                    <Icon name={isCorrupted ? "Eye" : "Send"} className="mr-2" />
+                    {isCorrupted ? 'ПРОДАТЬ ДУШУ' : 'ПОДАТЬ ЗАЯВКУ'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
             <Button variant="outline" size="lg" className={`${isCorrupted ? 'border-chaos-pink text-chaos-pink hover:bg-chaos-pink hover:text-black' : 'border-imperial-gold text-imperial-gold hover:bg-imperial-gold hover:text-black'}`}>
               <Icon name={isCorrupted ? "Eye" : "FileText"} className="mr-2" />
               {isCorrupted ? 'ПОЗНАТЬ ИСТИНУ' : 'УЗНАТЬ БОЛЬШЕ'}
@@ -298,10 +497,13 @@ const Index = () => {
                     {weapon.name}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-3">
                   <Badge variant="outline" className={`${isCorrupted ? 'border-chaos-purple text-chaos-purple' : 'border-imperial-red text-imperial-red'}`}>
                     {weapon.type}
                   </Badge>
+                  <CardDescription className={`${isCorrupted ? 'text-chaos-green' : 'text-gray-300'} text-sm`}>
+                    {weapon.description}
+                  </CardDescription>
                 </CardContent>
               </Card>
             ))}
