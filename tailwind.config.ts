@@ -66,6 +66,24 @@ export default {
 					green: '#00FF7F',
 					corruption: '#9932CC',
 				},
+				khorne: {
+					red: '#DC143C',
+					blood: '#8B0000',
+					brass: '#B87333',
+					dark: '#2F1B14',
+				},
+				nurgle: {
+					green: '#228B22',
+					disease: '#6B8E23',
+					rust: '#CD853F',
+					decay: '#556B2F',
+				},
+				slaanesh: {
+					purple: '#8B008B',
+					pink: '#FF69B4',
+					gold: '#FFD700',
+					pleasure: '#DA70D6',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

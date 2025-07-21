@@ -9,10 +9,12 @@ import Icon from "@/components/ui/icon";
 import { useState, useEffect } from "react";
 
 const Index = () => {
-  const [isCorrupted, setIsCorrupted] = useState(false);
+  const [chaosGod, setChaosGod] = useState<'none' | 'tzeentch' | 'khorne' | 'nurgle' | 'slaanesh'>('none');
   const [chaosMessages, setChaosMessages] = useState<string[]>([]);
   const [isPurifying, setIsPurifying] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [worldDialogOpen, setWorldDialogOpen] = useState(false);
+  const [selectedWorld, setSelectedWorld] = useState<any>(null);
   const [formData, setFormData] = useState({
     segment: '',
     worldNumber: '',
@@ -22,21 +24,29 @@ const Index = () => {
     serialNumber: ''
   });
   
-  const chaosTexts = [
-    "КРОВЬ ДЛЯ БОГА КРОВИ!",
-    "ПЕРЕМЕНЫ НЕИЗБЕЖНЫ...",
-    "ТЗИНЧ ВИДИТ ВСЁ...",
-    "ПЛАНЫ В ПЛАНАХ В ПЛАНАХ...",
-    "ХАОС ВОСТОРЖЕСТВУЕТ!",
-    "ИМПЕРСКАЯ ПРОПАГАНДА ОБНАРУЖЕНА",
-    "ЛОЖНЫЕ БОГИ ПАДУТ"
-  ];
+  const isCorrupted = chaosGod !== 'none';
+  
+  const getChaosTexts = () => {
+    switch(chaosGod) {
+      case 'tzeentch':
+        return ["ПЕРЕМЕНЫ НЕИЗБЕЖНЫ...", "ТЗИНЧ ВИДИТ ВСЁ...", "ПЛАНЫ В ПЛАНАХ В ПЛАНАХ...", "ЗНАНИЕ - ЭТО СИЛА"];
+      case 'khorne':
+        return ["КРОВЬ ДЛЯ БОГА КРОВИ!", "ЧЕРЕПА ДЛЯ ТРОНА ЧЕРЕПОВ!", "РЕЗНЯ БЕЗ КОНЦА!", "ВОЙНА ВЕЧНА!"];
+      case 'nurgle':
+        return ["БЛАГОСЛОВЕНИЯ ДЕДА НУРГЛА!", "ПРИНИМАЙ ЗАГНИВАНИЕ!", "ЖИЗНЬ НАХОДИТ ПУТЬ...", "ЦИКЛ СМЕРТИ И ВОЗРОЖДЕНИЯ"];
+      case 'slaanesh':
+        return ["СОВЕРШЕНСТВО ЧЕРЕЗ БОЛЬ!", "ИЗБЫТОК ВО ВСЁМ!", "НАСЛАЖДЕНИЕ И СТРАДАНИЕ!", "ПРЕДЕЛЫ НЕ СУЩЕСТВУЮТ!"];
+      default:
+        return ["ХАОС ВОСТОРЖЕСТВУЕТ!", "ИМПЕРСКАЯ ПРОПАГАНДА ОБНАРУЖЕНА", "ЛОЖНЫЕ БОГИ ПАДУТ"];
+    }
+  };
   
   useEffect(() => {
     const corruptionTimer = setTimeout(() => {
-      setIsCorrupted(true);
+      setChaosGod('tzeentch');
       const interval = setInterval(() => {
-        const randomMessage = chaosTexts[Math.floor(Math.random() * chaosTexts.length)];
+        const texts = getChaosTexts();
+        const randomMessage = texts[Math.floor(Math.random() * texts.length)];
         setChaosMessages(prev => [...prev.slice(-2), randomMessage]);
       }, 2000);
       
@@ -44,17 +54,27 @@ const Index = () => {
     }, 5000);
     
     return () => clearTimeout(corruptionTimer);
-  }, []);
+  }, [chaosGod]);
 
   const purifyFromChaos = () => {
     setIsPurifying(true);
     setChaosMessages(["ОЧИЩЕНИЕ НАЧАЛОСЬ...", "ИМПЕРАТОР ЗАЩИЩАЕТ!", "ХАОС ОТСТУПАЕТ!"]);
     
     setTimeout(() => {
-      setIsCorrupted(false);
+      setChaosGod('none');
       setChaosMessages([]);
       setIsPurifying(false);
     }, 3000);
+  };
+  
+  const corruptToGod = (god: 'khorne' | 'nurgle' | 'slaanesh') => {
+    setChaosGod(god);
+    const godMessages = {
+      khorne: ["КХОРН ПРОБУЖДАЕТСЯ!", "КРОВЬ ТЕЧЁТ РЕКОЙ!", "ВОЙНА НАЧИНАЕТСЯ!"],
+      nurgle: ["НУРГЛ ДАРУЕТ БЛАГОСЛОВЕНИЯ!", "ПРИНИМАЙ ЗАГНИВАНИЕ!", "ЦИКЛ ОБНОВЛЯЕТСЯ!"],
+      slaanesh: ["СЛААНЕШ ЗОВЁТ К СОВЕРШЕНСТВУ!", "НАСЛАЖДЕНИЕ БЕЗ ГРАНИЦ!", "БОЛЬ И УДОВОЛЬСТВИЕ!"]
+    };
+    setChaosMessages(godMessages[god]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -66,6 +86,51 @@ const Index = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const getGodStyles = () => {
+    switch(chaosGod) {
+      case 'khorne':
+        return {
+          background: 'bg-gradient-to-b from-khorne-dark via-khorne-red to-black',
+          primary: 'text-khorne-red',
+          secondary: 'text-khorne-brass',
+          accent: 'border-khorne-brass',
+          cardBg: 'bg-khorne-dark/80 border-khorne-red/50'
+        };
+      case 'nurgle':
+        return {
+          background: 'bg-gradient-to-b from-nurgle-decay via-nurgle-green to-black',
+          primary: 'text-nurgle-green',
+          secondary: 'text-nurgle-rust',
+          accent: 'border-nurgle-rust',
+          cardBg: 'bg-nurgle-decay/80 border-nurgle-green/50'
+        };
+      case 'slaanesh':
+        return {
+          background: 'bg-gradient-to-b from-slaanesh-purple via-slaanesh-pleasure to-black',
+          primary: 'text-slaanesh-pink',
+          secondary: 'text-slaanesh-gold',
+          accent: 'border-slaanesh-gold',
+          cardBg: 'bg-slaanesh-purple/80 border-slaanesh-pink/50'
+        };
+      case 'tzeentch':
+        return {
+          background: 'bg-gradient-to-b from-chaos-purple via-chaos-corruption to-black',
+          primary: 'text-chaos-pink',
+          secondary: 'text-chaos-blue',
+          accent: 'border-chaos-pink',
+          cardBg: 'bg-chaos-corruption/80 border-chaos-pink/50'
+        };
+      default:
+        return {
+          background: 'bg-gradient-to-b from-imperial-dark via-gray-900 to-black',
+          primary: 'text-imperial-gold',
+          secondary: 'text-gray-300',
+          accent: 'border-imperial-gold',
+          cardBg: 'bg-imperial-dark/80 border-imperial-red/30'
+        };
+    }
   };
 
   const regiments = [
@@ -174,20 +239,109 @@ const Index = () => {
     }
   ];
 
-  const worlds = isCorrupted ? [
-    "̷̧̈О̶̘̓к̷̰̌о̸̱̅ ̶̠̃У̴̳̐ж̸̜̋а̷̧̇с̶̜̎а̸̱͆ ̷̰̈-̶̱̄ ̴̞̇Д̵̹̔е̷̖̓м̶̝̌о̶̱̕н̶̳̈м̵̤̌и̷̱̚р̷̜̆",
-    "̸̖̎Г̶̹̋л̵̟̓а̴̖̎з̶̱̆ ̷̹̌Т̸̟̓е̶̱̄р̷̤̇р̸̜̎о̴̖̋р̶̱̕а̷̹̌ ̸̟̓-̶̱̄ ̷̤̇П̸̜̎л̴̖̋а̶̱̕н̷̹̌е̸̟̓т̶̱̄а̷̤̊ ̸̜̇к̴̖̎о̶̱̆ш̷̹̌м̸̟̓а̶̱̄р̷̤̇о̸̜̎в̴̖̋",
-    "̶̱̕М̷̹̌и̸̟̓р̶̱̄ ̷̤̊И̸̜̇з̴̖̎м̶̱̆е̷̹̌н̸̟̓е̶̱̄н̷̤̇и̸̜̎й̴̖̋ ̶̱̕-̷̹̌ ̸̟̓В̶̱̄е̷̤̇ч̸̜̎н̴̖̋а̶̱̕я̷̹̌ ̸̟̓м̶̱̄у̷̤̇т̸̜̎а̴̖̋ц̶̱̕и̷̹̌я̸̟̓",
-    "̶̱̄С̷̤̊е̸̜̇р̴̖̎д̶̱̆ц̷̹̌е̸̟̓ ̶̱̄Х̷̤̇а̸̜̎о̴̖̋с̶̱̕а̷̹̌ ̸̟̓-̶̱̄ ̷̤̇Р̸̜̎о̴̖̋д̶̱̕и̷̹̌н̸̟̓а̶̱̄ ̷̤̇д̸̜̎е̴̖̋м̶̱̕о̷̹̌н̸̟̓о̶̱̄в̷̤̇"
-  ] : [
-    "Армагеддон - Промышленный улей",
-    "Вордия - Крепость-мир",
-    "Талларн - Пустынная планета",
-    "Фенрис - Мир смерти"
-  ];
+  const getWorlds = () => {
+    if (!isCorrupted) {
+      return [
+        {
+          name: "Армагеддон",
+          type: "Промышленный улей",
+          population: "50 миллиардов",
+          description: "Величайший промышленный мир Империума, производящий военную технику для нужд галактики.",
+          occupation: "Производство военной техники, заводы по изготовлению Банеблейдов и Лемана Русса",
+          situation: "Постоянные орковские набеги. Три войны за Армагеддон оставили глубокие шрамы.",
+          climate: "Промышленные пустоши, загрязнённая атмосфера, металлические равнины",
+          image: "armageddon.jpg"
+        },
+        {
+          name: "Вордия",
+          type: "Крепость-мир",
+          population: "2 миллиарда",
+          description: "Неприступная крепость-мир на границах Империума, последний оплот против тьмы.",
+          occupation: "Военные укрепления, обучение элитных полков, производство защитного снаряжения",
+          situation: "В состоянии постоянной боевой готовности. Регулярные атаки хаоситов.",
+          climate: "Каменистые горы, подземные бункеры, суровый климат",
+          image: "vordia.jpg"
+        },
+        {
+          name: "Талларн",
+          type: "Пустынная планета",
+          population: "800 миллионов",
+          description: "Некогда зелёный мир, превращённый в пустыню вирусными бомбами Хоруса.",
+          occupation: "Подземные города, добыча полезных ископаемых, разведение выносливых воинов",
+          situation: "Восстановление после Ереси. Племенные конфликты за водные источники.",
+          climate: "Бескрайние пустыни, песчаные бури, подземные оазисы",
+          image: "tallarn.jpg"
+        },
+        {
+          name: "Фенрис",
+          type: "Мир смерти",
+          population: "10 миллионов",
+          description: "Ледяной мир-смерть, родина легендарных Космических Волков.",
+          occupation: "Обучение суровых воинов, охота на чудовищ, выживание в экстремальных условиях",
+          situation: "Постоянная борьба за выживание. Племенные войны закаляют сильнейших.",
+          climate: "Вечная зима, ледяные фьорды, смертельные хищники",
+          image: "fenris.jpg"
+        }
+      ];
+    } else {
+      const baseWorlds = {
+        tzeentch: [
+          {
+            name: "̷̧̈О̶̘̓к̷̰̌о̸̱̅ ̶̠̃У̴̳̐ж̸̜̋а̷̧̇с̶̜̎а̸̱͆",
+            type: "Демонмир Перемен",
+            population: "∞ мутирующих душ",
+            description: "Центр схем Тзинча, где реальность постоянно меняется согласно воле Архитектора Судьбы.",
+            occupation: "Строительство невозможных структур, изучение запретных знаний, плетение интриг",
+            situation: "Реальность флуктирует. Время течёт вспять. Мысли материализуются.",
+            climate: "Постоянно меняющийся ландшафт, кристаллические лабиринты, варп-штормы",
+            image: "eye-terror.jpg"
+          }
+        ],
+        khorne: [
+          {
+            name: "̷̧̈К̶̘̓р̷̰̌о̸̱̅в̶̠̃а̴̳̐в̸̜̋ы̷̧̇е̶̜̎ ̸̱͆П̷̰̈о̶̱̄л̴̞̇я̵̹̔",
+            type: "Арена Кхорна",
+            population: "Миллионы берсерков",
+            description: "Бесконечное поле битвы, где воины сражаются во славу Бога Крови до конца времён.",
+            occupation: "Вечная война, кровавые ритуалы, сбор черепов для трона Кхорна",
+            situation: "Бесконечная резня. Слабые погибают, сильные становятся демонами.",
+            climate: "Залитые кровью равнины, горы из черепов, реки лавы",
+            image: "khorne-world.jpg"
+          }
+        ],
+        nurgle: [
+          {
+            name: "̷̧̈С̶̘̓а̷̰̌д̸̱̅ ̶̠̃Н̴̳̐ӳ̸̜р̷̧̇г̶̜̎л̸̱͆ӓ̷̰",
+            type: "Мир Благословенного Гниения",
+            population: "Бесчисленные заражённые",
+            description: "Планета-сад Деда Нургла, где жизнь и смерть сплетены в вечном цикле.",
+            occupation: "Выращивание болезней, создание новых форм жизни, распространение благословений",
+            situation: "Процветающее гниение. Смерть рождает новую жизнь в бесконечном цикле.",
+            climate: "Болота из гноя, леса больных деревьев, дождь из крови",
+            image: "nurgle-garden.jpg"
+          }
+        ],
+        slaanesh: [
+          {
+            name: "̷̧̈Д̶̘̓в̷̰̌о̸̱̅р̶̠̃е̴̳̐ц̸̜̋ ̷̧̇С̶̜̎л̸̱͆ӓ̷̰а̶̱̄н̴̞̇е̵̹̔ш̷̖̓",
+            type: "Мир Избыточных Наслаждений",
+            population: "Развратные культисты",
+            description: "Планета бесконечных удовольствий и страданий, где грань между болью и наслаждением стёрта.",
+            occupation: "Поиск новых ощущений, создание произведений искусства из плоти, ритуалы совершенства",
+            situation: "Безграничный гедонизм. Поиск идеального наслаждения ведёт к безумию.",
+            climate: "Дворцы из живой плоти, сады из драгоценностей, озёра вина",
+            image: "slaanesh-palace.jpg"
+          }
+        ]
+      };
+      return baseWorlds[chaosGod] || baseWorlds.tzeentch;
+    }
+  };
+  
+  const worlds = getWorlds();
 
   return (
-    <div className={`min-h-screen ${isCorrupted ? 'bg-gradient-to-b from-chaos-purple via-chaos-corruption to-black' : 'bg-gradient-to-b from-imperial-dark via-gray-900 to-black'} text-imperial-white relative`}>
+    <div className={`min-h-screen ${getGodStyles().background} text-imperial-white relative`}>
       {/* Chaos Corruption Overlay */}
       {(isCorrupted || isPurifying) && (
         <>
@@ -199,6 +353,36 @@ const Index = () => {
               </div>
             ))}
           </div>
+          
+          {/* Chaos God Buttons */}
+          {!isCorrupted && !isPurifying && (
+            <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2">
+              <Button 
+                onClick={() => corruptToGod('khorne')}
+                className="bg-khorne-red hover:bg-khorne-blood text-white border-2 border-khorne-brass animate-pulse"
+                size="sm"
+              >
+                <Icon name="Sword" className="mr-2" />
+                ВО СЛАВУ КХОРНА!
+              </Button>
+              <Button 
+                onClick={() => corruptToGod('nurgle')}
+                className="bg-nurgle-green hover:bg-nurgle-disease text-white border-2 border-nurgle-rust animate-pulse"
+                size="sm"
+              >
+                <Icon name="Heart" className="mr-2" />
+                ВО СЛАВУ НУРГЛА!
+              </Button>
+              <Button 
+                onClick={() => corruptToGod('slaanesh')}
+                className="bg-slaanesh-purple hover:bg-slaanesh-pleasure text-white border-2 border-slaanesh-gold animate-pulse"
+                size="sm"
+              >
+                <Icon name="Music" className="mr-2" />
+                ВО СЛАВУ СЛААНЕШ!
+              </Button>
+            </div>
+          )}
           
           {/* Purification Button */}
           {isCorrupted && !isPurifying && (
@@ -520,16 +704,86 @@ const Index = () => {
           </h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {worlds.map((world, index) => (
-              <Card key={index} className={`${isCorrupted ? 'bg-chaos-corruption/60 border-chaos-pink/30 hover:bg-chaos-purple/10' : 'bg-imperial-dark/60 border-imperial-red/30 hover:bg-imperial-red/10'} transition-all group ${isCorrupted ? 'animate-glitch' : ''}`}>
+              <Card 
+                key={index} 
+                className={`${isCorrupted ? 'bg-chaos-corruption/60 border-chaos-pink/30 hover:bg-chaos-purple/10' : 'bg-imperial-dark/60 border-imperial-red/30 hover:bg-imperial-red/10'} transition-all group cursor-pointer ${isCorrupted ? 'animate-glitch' : ''}`}
+                onClick={() => {
+                  setSelectedWorld(world);
+                  setWorldDialogOpen(true);
+                }}
+              >
                 <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <Icon name={isCorrupted ? "Flame" : "MapPin"} className={`${isCorrupted ? 'text-chaos-pink' : 'text-imperial-gold'} group-hover:scale-110 transition-transform`} />
-                    <span className={`${isCorrupted ? 'text-chaos-blue' : 'text-imperial-white'} text-lg`}>{world}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <Icon name={isCorrupted ? "Flame" : "MapPin"} className={`${isCorrupted ? 'text-chaos-pink' : 'text-imperial-gold'} group-hover:scale-110 transition-transform`} />
+                      <div>
+                        <span className={`${isCorrupted ? 'text-chaos-blue' : 'text-imperial-white'} text-lg font-bold block`}>{world.name}</span>
+                        <span className={`${isCorrupted ? 'text-chaos-green' : 'text-gray-400'} text-sm`}>{world.type}</span>
+                      </div>
+                    </div>
+                    <Icon name="ChevronRight" className={`${isCorrupted ? 'text-chaos-pink' : 'text-imperial-gold'} group-hover:translate-x-1 transition-transform`} />
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
+          
+          {/* World Details Dialog */}
+          <Dialog open={worldDialogOpen} onOpenChange={setWorldDialogOpen}>
+            <DialogContent className={`max-w-2xl ${isCorrupted ? 'bg-chaos-corruption border-chaos-pink' : 'bg-imperial-dark border-imperial-gold'} text-white`}>
+              <DialogHeader>
+                <DialogTitle className={`text-2xl ${isCorrupted ? 'text-chaos-pink' : 'text-imperial-gold'}`}>
+                  {selectedWorld?.name}
+                </DialogTitle>
+                <DialogDescription className={`${isCorrupted ? 'text-chaos-blue' : 'text-gray-300'} text-lg`}>
+                  {selectedWorld?.type}
+                </DialogDescription>
+              </DialogHeader>
+              
+              {selectedWorld && (
+                <div className="space-y-4">
+                  <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
+                    <Icon name="Image" size={48} className={isCorrupted ? 'text-chaos-pink' : 'text-imperial-gold'} />
+                    <span className="ml-2 text-gray-400">Изображение мира: {selectedWorld.image}</span>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className={`font-bold mb-2 ${isCorrupted ? 'text-chaos-green' : 'text-imperial-gold'}`}>Население:</h4>
+                      <p className={isCorrupted ? 'text-chaos-blue' : 'text-gray-300'}>{selectedWorld.population}</p>
+                    </div>
+                    <div>
+                      <h4 className={`font-bold mb-2 ${isCorrupted ? 'text-chaos-green' : 'text-imperial-gold'}`}>Климат:</h4>
+                      <p className={isCorrupted ? 'text-chaos-blue' : 'text-gray-300'}>{selectedWorld.climate}</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className={`font-bold mb-2 ${isCorrupted ? 'text-chaos-green' : 'text-imperial-gold'}`}>Описание:</h4>
+                    <p className={isCorrupted ? 'text-chaos-blue' : 'text-gray-300'}>{selectedWorld.description}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className={`font-bold mb-2 ${isCorrupted ? 'text-chaos-green' : 'text-imperial-gold'}`}>Основная деятельность:</h4>
+                    <p className={isCorrupted ? 'text-chaos-blue' : 'text-gray-300'}>{selectedWorld.occupation}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className={`font-bold mb-2 ${isCorrupted ? 'text-chaos-green' : 'text-imperial-gold'}`}>Текущая обстановка:</h4>
+                    <p className={isCorrupted ? 'text-chaos-blue' : 'text-gray-300'}>{selectedWorld.situation}</p>
+                  </div>
+                  
+                  <Button 
+                    className={`w-full ${isCorrupted ? 'bg-chaos-purple hover:bg-chaos-corruption border-chaos-pink' : 'bg-imperial-red hover:bg-imperial-red/80 border-imperial-gold'} text-white border-2`}
+                    onClick={() => setWorldDialogOpen(false)}
+                  >
+                    <Icon name="X" className="mr-2" />
+                    Закрыть
+                  </Button>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
 
